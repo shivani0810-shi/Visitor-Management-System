@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisiTrack | Advanced Admin Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --sidebar: #0f172a;
+      --accent: #2563eb;
+      --page-bg: #f4f7fb;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --text: #1e293b;
+    }
+
+    body {
+      background: var(--page-bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .layout {
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--sidebar);
+      color: #fff;
+      min-height: 100vh;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+    }
+
+    .brand {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: .2px;
+      margin-bottom: 34px;
+    }
+
+    .brand i {
+      color: #60a5fa;
+    }
+
+    .nav-link {
+      color: #cbd5e1;
+      border-radius: 12px;
+      padding: 11px 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(37, 99, 235, .18);
+      color: #fff;
+    }
+
+    .content {
+      background: #fff;
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .topbar,
+    .card-box {
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+    }
+
+    .card-box {
+      background: #fff;
+      padding: 24px;
+    }
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, .12);
+      color: var(--accent);
+      font-size: 1.35rem;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+
+    .text-muted-custom {
+      color: var(--text-muted);
+    }
+
+    .table > :not(caption) > * > * {
+      padding: 1rem .9rem;
+    }
+
+    .badge-soft {
+      background: rgba(37, 99, 235, .12);
+      color: var(--accent);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, .12);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .notification-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: #334155;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .notification-dot {
+      width: 9px;
+      height: 9px;
+      background: #ef4444;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+    .chart-wrap {
+      height: 290px;
+      position: relative;
+    }
+
+    .chart-wrap-sm {
+      height: 255px;
+      position: relative;
+    }
+
+    .quick-action {
+      min-height: 130px;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .quick-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .11);
+    }
+
+    .side-item {
+      border-bottom: 1px solid var(--border);
+      padding: 15px 0;
+    }
+
+    .side-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .metric-trend {
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 991.98px) {
+      .sidebar {
+        min-height: auto;
+        position: static;
+      }
+
+      .content {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row layout">
+
+      <aside class="col-lg-3 col-xl-2 sidebar">
+        <div class="brand d-flex align-items-center gap-2">
+          <i class="bi bi-shield-check"></i>
+          <span>VisiTrack</span>
+        </div>
+
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+          <a class="nav-link" href="#"><i class="bi bi-person-plus me-2"></i>All Visitors</a>
+          <a class="nav-link" href="/approval"><i class="bi bi-check2-square me-2"></i>Approval</a>
+
+          <a class="nav-link" href="/report"><i class="bi bi-bar-chart-line me-2"></i>Reports</a>
+          <a class="nav-link" href="/qrpass"><i class="bi bi-qr-code me-2"></i>QR Passes</a>
+          <a class="nav-link" href="#"><i class="bi bi-gear me-2"></i>Settings</a>
+          <a class="nav-link" href="/logout"><i class="bi bi-box-arrow-left me-2"></i>Logout</a>
+        </nav>
+      </aside>
+
+      <main class="col-lg-9 col-xl-10 content">
+
+        <div class="topbar bg-white p-4 mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <h1 class="h3 fw-bold mb-1">Admin Dashboard</h1>
+            <p class="text-muted-custom mb-0">Enterprise overview of visitors, approvals, employees, and security activity.</p>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="notification-btn">
+              <i class="bi bi-bell"></i>
+              <span class="notification-dot"></span>
+            </button>
+
+            <div class="text-end">
+              <span class="text-muted-custom d-block small">Current Date</span>
+              <span class="fw-semibold" id="currentDate">18 Jun 2026</span>
+            </div>
+
+            <span class="avatar">AD</span>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-md-6 col-xl-4">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Total Visitors</p>
+                  <h2 class="fw-bold mb-1">{{ total_visitors }}</h2>
+                  <span class="metric-trend text-success"><i class="bi bi-arrow-up-short"></i>12.4% this month</span>
+                </div>
+                <span class="icon-box"><i class="bi bi-people"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-xl-4">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Today's Visitors</p>
+                  <h2 class="fw-bold mb-1">{{ today_visitors }}</h2>
+                  <span class="metric-trend text-success"><i class="bi bi-arrow-up-short"></i>8 more than yesterday</span>
+                </div>
+                <span class="icon-box"><i class="bi bi-calendar-day"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-xl-4">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Pending Visitors</p>
+                  <h2 class="fw-bold mb-1">{{ pending_visitors }}</h2>
+                  <span class="metric-trend text-warning"><i class="bi bi-clock"></i>5 urgent reviews</span>
+                </div>
+                <span class="icon-box"><i class="bi bi-hourglass-split"></i></span>
+              </div>
+            </div>
+          </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-xl-8">
+
+            <div class="row g-4 mb-4">
+              <div class="col-lg-8">
+                <div class="card-box h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0">Weekly Visitor Trend</h2>
+                    <span class="badge badge-soft rounded-pill px-3 py-2">Live analytics</span>
+                  </div>
+
+                  <div class="chart-wrap">
+                    <canvas id="weeklyTrendChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="card-box h-100">
+                  <h2 class="h5 fw-bold mb-3">Visitor Purpose Distribution</h2>
+                  <div class="chart-wrap">
+                    <canvas id="purposeChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Monthly Visitor Analytics</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">2026</span>
+              </div>
+
+              <div class="chart-wrap-sm">
+                <canvas id="monthlyChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Recent Visitors</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">Updated now</span>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    {% for visitor in recent_visitors %}
+                    <tr>
+                      <td>{{ visitor.name }}</td>
+                      <td>{{ visitor.company }}</td>
+                      <td>{{ visitor.employee }}</td>
+                      <td>{{ visitor.purpose }}</td>
+                      <td>{{ visitor.checkin_time }}</td>
+                      <td>
+                        <span class="badge text-bg-success">
+                               {{ visitor.status }}
+                              </span>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td>Rahul Sharma</td>
+                      <td>BluePeak Systems</td>
+                      <td>Ananya Rao</td>
+                      <td>Client Meeting</td>
+                      <td>09:15 AM</td>
+                      <td><span class="badge text-bg-success">Checked In</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">View</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Priya Mehta</td>
+                      <td>Northline Finance</td>
+                      <td>Vikram Patel</td>
+                      <td>Audit Review</td>
+                      <td>10:05 AM</td>
+                      <td><span class="badge text-bg-warning">Pending</span></td>
+                      <td><button class="btn btn-sm btn-accent">Approve</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Arjun Nair</td>
+                      <td>CloudAxis</td>
+                      <td>Meera Iyer</td>
+                      <td>Vendor Demo</td>
+                      <td>11:20 AM</td>
+                      <td><span class="badge text-bg-secondary">Checked Out</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">Pass</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Sneha Kapoor</td>
+                      <td>MetroBuild</td>
+                      <td>Karan Malhotra</td>
+                      <td>Project Discussion</td>
+                      <td>12:10 PM</td>
+                      <td><span class="badge text-bg-success">Checked In</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">Check Out</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Manoj Kumar</td>
+                      <td>Swift Courier</td>
+                      <td>Admin Desk</td>
+                      <td>Delivery</td>
+                      <td>01:05 PM</td>
+                      <td><span class="badge text-bg-info">Pass Issued</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">Print</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h2 class="h5 fw-bold mb-3">Quick Actions</h2>
+
+              <div class="row g-3">
+                <div class="col-sm-6 col-xl-4">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-person-plus"></i></span>
+                    <h3 class="h6 fw-bold">Register Visitor</h3>
+                    <button class="btn btn-accent btn-sm mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-4">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-check2-square"></i></span>
+                    <h3 class="h6 fw-bold">Approve Requests</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-4">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-qr-code"></i></span>
+                    <h3 class="h6 fw-bold">Generate QR Pass</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-4">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-people"></i></span>
+                    <h3 class="h6 fw-bold">Manage Users</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-4">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-file-earmark-bar-graph"></i></span>
+                    <h3 class="h6 fw-bold">View Reports</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-4">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-building"></i></span>
+                    <h3 class="h6 fw-bold">Employee Directory</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-4">
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Today's Schedule</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">11</span>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">Northline Finance Team</h3>
+                    <p class="text-muted-custom mb-0">Board room audit review</p>
+                  </div>
+                  <span class="fw-semibold">10:30</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">MetroBuild Consultants</h3>
+                    <p class="text-muted-custom mb-0">Facilities planning session</p>
+                  </div>
+                  <span class="fw-semibold">02:15</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">CloudAxis Support</h3>
+                    <p class="text-muted-custom mb-0">Infrastructure service visit</p>
+                  </div>
+                  <span class="fw-semibold">04:00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Security Alerts</h2>
+                <span class="badge text-bg-danger rounded-pill px-3 py-2">3</span>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Badge not returned</h3>
+                <p class="text-muted-custom mb-0">Visitor pass VP-1047 pending return from yesterday.</p>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Delayed checkout</h3>
+                <p class="text-muted-custom mb-0">Two active visitors exceeded scheduled meeting duration.</p>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Manual approval required</h3>
+                <p class="text-muted-custom mb-0">External vendor access needs admin confirmation.</p>
+              </div>
+            </div>
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Pending Approvals</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">14</span>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between">
+                  <span>Priya Mehta</span>
+                  <span class="badge text-bg-warning">Audit</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between">
+                  <span>Kavya Singh</span>
+                  <span class="badge text-bg-warning">Interview</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between">
+                  <span>Sameer Khan</span>
+                  <span class="badge text-bg-info">Review</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-box">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Upcoming Meetings</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">7</span>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Executive Vendor Review</h3>
+                <p class="text-muted-custom mb-0">Tomorrow at 11:00 AM with 5 guests.</p>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Hiring Panel Interviews</h3>
+                <p class="text-muted-custom mb-0">Friday schedule includes 8 candidate visits.</p>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Security System Audit</h3>
+                <p class="text-muted-custom mb-0">Access logs and QR pass review next week.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('currentDate').textContent =
+      new Date().toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+    const chartTextColor = '#64748b';
+    const gridColor = 'rgba(100, 116, 139, .16)';
+
+    new Chart(document.getElementById('weeklyTrendChart'), {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Visitors',
+          data: [42, 58, 49, 68, 76, 38, 44],
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, .12)',
+          borderWidth: 3,
+          fill: true,
+          tension: .4,
+          pointBackgroundColor: '#2563eb',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: chartTextColor
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: gridColor
+            },
+            ticks: {
+              color: chartTextColor,
+              stepSize: 20
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('purposeChart'), {
+      type: 'pie',
+      data: {
+        labels: ['Business', 'Interview', 'Vendor', 'Delivery', 'Audit'],
+        datasets: [{
+          data: [34, 18, 20, 16, 12],
+          backgroundColor: ['#2563eb', '#22c55e', '#f59e0b', '#64748b', '#ef4444'],
+          borderColor: '#fff',
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: chartTextColor,
+              boxWidth: 12,
+              padding: 14
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('monthlyChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        datasets: [{
+          label: 'Visitors',
+          data: [820, 940, 1010, 1120, 1240, 1380, 1290, 1440, 1520, 1480, 1590, 1660],
+          backgroundColor: 'rgba(37, 99, 235, .82)',
+          borderRadius: 8,
+          maxBarThickness: 34
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: chartTextColor
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: gridColor
+            },
+            ticks: {
+              color: chartTextColor,
+              stepSize: 400
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

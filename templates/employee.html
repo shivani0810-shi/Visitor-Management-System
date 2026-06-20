@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VisiTrack | Employee Dashboard</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --sidebar: #0f172a;
+      --accent: #2563eb;
+      --page-bg: #f4f7fb;
+      --text-muted: #64748b;
+    }
+
+    body {
+      background: var(--page-bg);
+      color: #1e293b;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .layout {
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--sidebar);
+      color: #fff;
+      min-height: 100vh;
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+    }
+
+    .brand {
+      font-size: 1.45rem;
+      font-weight: 700;
+      letter-spacing: .2px;
+      margin-bottom: 34px;
+    }
+
+    .brand i {
+      color: #60a5fa;
+    }
+
+    .nav-link {
+      color: #cbd5e1;
+      border-radius: 12px;
+      padding: 11px 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(37, 99, 235, .18);
+      color: #fff;
+    }
+
+    .content {
+      background: #fff;
+      min-height: 100vh;
+      padding: 28px;
+    }
+
+    .topbar,
+    .card-box {
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+    }
+
+    .card-box {
+      background: #fff;
+      padding: 24px;
+    }
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, .12);
+      color: var(--accent);
+      font-size: 1.35rem;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: #fff;
+    }
+
+    .text-muted-custom {
+      color: var(--text-muted);
+    }
+
+    .table > :not(caption) > * > * {
+      padding: 1rem .9rem;
+    }
+
+    .badge-soft {
+      background: rgba(37, 99, 235, .12);
+      color: var(--accent);
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37, 99, 235, .12);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .notification-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      color: #334155;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .notification-dot {
+      width: 9px;
+      height: 9px;
+      background: #ef4444;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      position: absolute;
+      right: 10px;
+      top: 10px;
+    }
+
+    .chart-wrap {
+      height: 285px;
+      position: relative;
+    }
+
+    .quick-action {
+      min-height: 128px;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .quick-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .11);
+    }
+
+    .side-item {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 15px 0;
+    }
+
+    .side-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    @media (max-width: 991.98px) {
+      .sidebar {
+        min-height: auto;
+        position: static;
+      }
+
+      .content {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="row layout">
+      <aside class="col-lg-3 col-xl-2 sidebar">
+        <div class="brand d-flex align-items-center gap-2">
+          <i class="bi bi-shield-check"></i>
+          <span>VisiTrack</span>
+        </div>
+
+        <nav class="nav flex-column">
+          <a class="nav-link active" href="#"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+          <a class="nav-link" href="#"><i class="bi bi-inbox me-2"></i>Visitor Requests</a>
+          <a class="nav-link" href="#"><i class="bi bi-check2-square me-2"></i>Visitors Approvals</a>
+          <a class="nav-link" href="#"><i class="bi bi-clock-history me-2"></i>Visitor History</a>
+          <a class="nav-link" href="#"><i class="bi bi-person-circle me-2"></i>Profile</a>
+          <a class="nav-link" href="#"><i class="bi bi-box-arrow-left me-2"></i>Logout</a>
+        </nav>
+      </aside>
+
+      <main class="col-lg-9 col-xl-10 content">
+        <div class="topbar bg-white p-4 mb-4 d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+          <div>
+            <h1 class="h3 fw-bold mb-1">Employee Dashboard</h1>
+            <p class="text-muted-custom mb-0">Review visitor requests, approvals, meetings, and visit history.</p>
+          </div>
+
+          <div class="d-flex align-items-center gap-3">
+            <button class="notification-btn">
+              <i class="bi bi-bell"></i>
+              <span class="notification-dot"></span>
+            </button>
+
+            <div class="text-end">
+              <span class="text-muted-custom d-block small">Current Date</span>
+              <span class="fw-semibold" id="currentDate">18 Jun 2026</span>
+            </div>
+
+            <span class="avatar">AR</span>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-md-6 col-xl-3">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Pending Requests</p>
+                  <h2 class="fw-bold mb-0">7</h2>
+                </div>
+                <span class="icon-box"><i class="bi bi-hourglass-split"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-xl-3">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Approved Visitors</p>
+                  <h2 class="fw-bold mb-0">24</h2>
+                </div>
+                <span class="icon-box"><i class="bi bi-check-circle"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-xl-3">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Today's Meetings</p>
+                  <h2 class="fw-bold mb-0">6</h2>
+                </div>
+                <span class="icon-box"><i class="bi bi-calendar-day"></i></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-xl-3">
+            <div class="card-box h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <p class="text-muted-custom mb-1">Visitor History Count</p>
+                  <h2 class="fw-bold mb-0">148</h2>
+                </div>
+                <span class="icon-box"><i class="bi bi-journal-text"></i></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+          <div class="col-xl-8">
+            <div class="row g-4 mb-4">
+              <div class="col-lg-8">
+                <div class="card-box h-100">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0">Weekly Visitor Requests</h2>
+                    <span class="badge badge-soft rounded-pill px-3 py-2">This week</span>
+                  </div>
+
+                  <div class="chart-wrap">
+                    <canvas id="requestsChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-4">
+                <div class="card-box h-100">
+                  <h2 class="h5 fw-bold mb-3">Visitor Request Status</h2>
+                  <div class="chart-wrap">
+                    <canvas id="statusChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h5 fw-bold mb-0">Visitor Requests</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">3 new</span>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Visitor Name</th>
+                      <th>Company</th>
+                      <th>Purpose</th>
+                      <th>Request Date</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td>Amit Verma</td>
+                      <td>PrimeTech Solutions</td>
+                      <td>Project Discussion</td>
+                      <td>18 Jun 2026</td>
+                      <td><span class="badge text-bg-warning">Pending</span></td>
+                      <td><button class="btn btn-sm btn-accent">Approve</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Kavya Singh</td>
+                      <td>MarketPulse Media</td>
+                      <td>Campaign Review</td>
+                      <td>18 Jun 2026</td>
+                      <td><span class="badge text-bg-warning">Pending</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">Review</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Rohan Das</td>
+                      <td>UrbanWorks</td>
+                      <td>Vendor Briefing</td>
+                      <td>17 Jun 2026</td>
+                      <td><span class="badge text-bg-success">Approved</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">View</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Leena George</td>
+                      <td>FinEdge Advisory</td>
+                      <td>Audit Meeting</td>
+                      <td>16 Jun 2026</td>
+                      <td><span class="badge text-bg-secondary">Completed</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">History</button></td>
+                    </tr>
+
+                    <tr>
+                      <td>Akash Bhat</td>
+                      <td>DataNest Labs</td>
+                      <td>Technical Interview</td>
+                      <td>15 Jun 2026</td>
+                      <td><span class="badge text-bg-danger">Rejected</span></td>
+                      <td><button class="btn btn-sm btn-outline-primary rounded-3">Details</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h2 class="h5 fw-bold mb-3">Quick Actions</h2>
+
+              <div class="row g-3">
+                <div class="col-sm-6 col-xl-3">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-check2-circle"></i></span>
+                    <h3 class="h6 fw-bold">Approve Visitor</h3>
+                    <button class="btn btn-accent btn-sm mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-x-circle"></i></span>
+                    <h3 class="h6 fw-bold">Reject Visitor</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-clock-history"></i></span>
+                    <h3 class="h6 fw-bold">View Visitor History</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                  <div class="card-box quick-action h-100">
+                    <span class="icon-box mb-3"><i class="bi bi-calendar-plus"></i></span>
+                    <h3 class="h6 fw-bold">Schedule Meeting</h3>
+                    <button class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">Open</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-4">
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Today's Meetings</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">6</span>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">Amit Verma</h3>
+                    <p class="text-muted-custom mb-0">Project discussion in Conference Room A</p>
+                  </div>
+                  <span class="fw-semibold">10:30</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">Kavya Singh</h3>
+                    <p class="text-muted-custom mb-0">Campaign review with Marketing</p>
+                  </div>
+                  <span class="fw-semibold">02:15</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between gap-3">
+                  <div>
+                    <h3 class="h6 fw-bold mb-1">Rohan Das</h3>
+                    <p class="text-muted-custom mb-0">Vendor briefing for procurement</p>
+                  </div>
+                  <span class="fw-semibold">04:00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-box mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Upcoming Visitors</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">8</span>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Meera Nair</h3>
+                <p class="text-muted-custom mb-0">Tomorrow at 11:00 AM for product walkthrough.</p>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">Northline Finance Team</h3>
+                <p class="text-muted-custom mb-0">Friday review meeting with 3 guests.</p>
+              </div>
+
+              <div class="side-item">
+                <h3 class="h6 fw-bold mb-1">SecurePrint Services</h3>
+                <p class="text-muted-custom mb-0">Access card setup visit scheduled next week.</p>
+              </div>
+            </div>
+
+            <div class="card-box">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <h2 class="h5 fw-bold mb-0">Pending Approvals</h2>
+                <span class="badge badge-soft rounded-pill px-3 py-2">7</span>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between">
+                  <span>Amit Verma</span>
+                  <span class="badge text-bg-warning">Pending</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between">
+                  <span>Kavya Singh</span>
+                  <span class="badge text-bg-warning">Pending</span>
+                </div>
+              </div>
+
+              <div class="side-item">
+                <div class="d-flex justify-content-between">
+                  <span>Sameer Khan</span>
+                  <span class="badge text-bg-info">Review</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('currentDate').textContent =
+      new Date().toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
+
+    const chartTextColor = '#64748b';
+    const gridColor = 'rgba(100, 116, 139, .16)';
+
+    new Chart(document.getElementById('requestsChart'), {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Requests',
+          data: [6, 9, 7, 12, 10, 5, 8],
+          borderColor: '#2563eb',
+          backgroundColor: 'rgba(37, 99, 235, .12)',
+          borderWidth: 3,
+          fill: true,
+          tension: .4,
+          pointBackgroundColor: '#2563eb',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: chartTextColor
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: gridColor
+            },
+            ticks: {
+              color: chartTextColor,
+              stepSize: 4
+            }
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('statusChart'), {
+      type: 'pie',
+      data: {
+        labels: ['Approved', 'Pending', 'Rejected', 'Completed'],
+        datasets: [{
+          data: [42, 24, 10, 24],
+          backgroundColor: ['#2563eb', '#f59e0b', '#ef4444', '#64748b'],
+          borderColor: '#fff',
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: chartTextColor,
+              boxWidth: 12,
+              padding: 16
+            }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
