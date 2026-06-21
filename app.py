@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify, session,redirect, ur
 from db import db,cursor
 import os
 import qrcode
+import time
 from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = "vms_secret_key"
@@ -13,6 +14,7 @@ app.config['UPLOAD_PHOTO'] = os.path.join(BASE_DIR, 'static/uploads/photos')
 app.config['UPLOAD_ID'] = os.path.join(BASE_DIR, 'static/uploads/idproofs')
 
 
+
 # ---------------------------
 # LOGIN PAGE
 # ---------------------------
@@ -21,12 +23,48 @@ def home():
     return render_template('login.html')
 @app.route('/approval')
 def approval():
-    return render_template('Approval.html')
+
+    cursor.execute("""
+        SELECT COUNT(*) AS pending
+        FROM Visitors
+        WHERE Status='Pending'
+    """)
+    pending = cursor.fetchone()['pending']
+
+    cursor.execute("""
+        SELECT COUNT(*) AS approved
+        FROM Visitors
+        WHERE Status='Approved'
+    """)
+    approved = cursor.fetchone()['approved']
+
+    cursor.execute("""
+        SELECT COUNT(*) AS rejected
+        FROM Visitors
+        WHERE Status='Rejected'
+    """)
+    rejected = cursor.fetchone()['rejected']
+
+    cursor.execute("""
+        SELECT *
+        FROM Visitors
+        ORDER BY VisitorID DESC
+    """)
+    visitors = cursor.fetchall()
+
+    return render_template(
+        'Approval.html',
+        visitors=visitors,
+        pending=pending,
+        approved=approved,
+        rejected=rejected
+    )
 
 
 @app.route('/generate-pass', methods=['POST'])
+@app.route('/generate-pass', methods=['POST'])
 def generate_pass():
-    print("Generate Pass Clicked")
+
     visitor_name = request.form['visitor_name']
     employee_name = request.form['employee_name']
     visit_date = request.form['visit_date']
@@ -43,38 +81,51 @@ def generate_pass():
     if not visitor:
         return redirect('/qrpass')
 
-    qr_data = f"""
-    Visitor ID: {visitor['VisitorID']}
-    Name: {visitor['Name']}
-    Employee: {employee_name}
-    Date: {visit_date}
-    """
+    qr_data = f"VMS-{visitor['VisitorID']}"
 
     qr = qrcode.make(qr_data)
 
-    qr_folder = os.path.join("static", "qr")
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    qr_folder = os.path.join(BASE_DIR, "static", "qr")
     os.makedirs(qr_folder, exist_ok=True)
 
-    qr_path = os.path.join(qr_folder, "visitor_pass.png")
+    qr_path = os.path.join(
+        qr_folder,
+        f"visitor_{visitor['VisitorID']}.png"
+    )
+
     qr.save(qr_path)
-    print(request.form)
-    visitor_name = request.form['visitor_name']
-    print("Searching for:", visitor_name)
-    cursor.execute("""
-    SELECT * FROM Visitors
-    WHERE Name=%s
-    ORDER BY VisitorID DESC
-    LIMIT 1
-    """, (visitor_name,))
-    visitor = cursor.fetchone()
-    print("Visitor Found:", visitor)
 
     return render_template(
         "QRPass.html",
         visitor=visitor,
         employee_name=employee_name,
-        qr_image="qr/visitor_pass.png"
+        qr_image=f"qr/visitor_{visitor['VisitorID']}.png"
     )
+@app.route('/checkin/<int:visitor_id>')
+def checkin(visitor_id):
+
+    cursor.execute("""
+        UPDATE Visitors
+        SET CheckInStatus=%s
+        WHERE VisitorID=%s
+    """, ("Checked In", visitor_id))
+
+    db.commit()
+
+    return redirect('/checkinout')
+@app.route('/checkout/<int:visitor_id>')
+def checkout(visitor_id):
+
+    cursor.execute("""
+        UPDATE Visitors
+        SET CheckInStatus=%s
+        WHERE VisitorID=%s
+    """, ("Checked Out", visitor_id))
+
+    db.commit()
+
+    return redirect('/checkinout')
 @app.route('/approve/<int:id>')
 def approve_visitor(id):
     cursor.execute(
@@ -83,6 +134,56 @@ def approve_visitor(id):
     )
     db.commit()
     return redirect('/approval')
+@app.route('/checkinout')
+def checkinout():
+
+    cursor.execute("""
+        SELECT *
+        FROM Visitors
+        WHERE Status='Approved'
+    """)
+    visitors = cursor.fetchall()
+
+    # Checked In
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM Visitors
+        WHERE CheckInStatus='Checked In'
+    """)
+    checked_in = cursor.fetchone()['total']
+
+    # Checked Out
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM Visitors
+        WHERE CheckInStatus='Checked Out'
+    """)
+    checked_out = cursor.fetchone()['total']
+
+    # Currently Inside
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM Visitors
+        WHERE CheckInStatus='Checked In'
+    """)
+    inside = cursor.fetchone()['total']
+
+    # Pending Check-Out
+    cursor.execute("""
+        SELECT COUNT(*) AS total
+        FROM Visitors
+        WHERE CheckInStatus='Checked In'
+    """)
+    pending_checkout = cursor.fetchone()['total']
+
+    return render_template(
+        'CheckInOut.html',
+        visitors=visitors,
+        checked_in=checked_in,
+        checked_out=checked_out,
+        inside=inside,
+        pending_checkout=pending_checkout
+    )
 @app.route('/reject/<int:id>')
 def reject_visitor(id):
     cursor.execute(
@@ -91,6 +192,10 @@ def reject_visitor(id):
     )
     db.commit()
     return redirect('/approval')
+@app.route('/scan', methods=['POST'])
+def scan_qr():
+    qr_data = request.form['qr_data']
+    return qr_data
 @app.route('/report')
 def report():
 
@@ -131,9 +236,7 @@ def report():
         pending=pending
     )
 
-@app.route('/checkinout')
-def checkinout():
-    return render_template('CheckInOut.html')
+
 import qrcode
 
 @app.route('/qrpass')

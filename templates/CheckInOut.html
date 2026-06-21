@@ -288,9 +288,7 @@
         <i class="bi bi-person-plus"></i> Visitor Registration
       </a>
 
-      <a href="/approval" class="nav-link">
-        <i class="bi bi-check2-square"></i> Approvals
-      </a>
+      
 
       <a href="/checkinout" class="nav-link active">
         <i class="bi bi-box-arrow-in-right"></i> Check-In / Check-Out
@@ -333,7 +331,7 @@
             <i class="bi bi-box-arrow-in-right"></i>
           </div>
           <h6>Checked In Today</h6>
-          <h3>64</h3>
+          <h3>{{ checked_in }}</h3>
         </div>
       </div>
 
@@ -343,7 +341,7 @@
             <i class="bi bi-box-arrow-right"></i>
           </div>
           <h6>Checked Out Today</h6>
-          <h3>41</h3>
+          <h3>{{ checked_out }}</h3>
         </div>
       </div>
 
@@ -353,7 +351,7 @@
             <i class="bi bi-building-check"></i>
           </div>
           <h6>Currently Inside</h6>
-          <h3>23</h3>
+          <h3>{{ inside }}</h3>
         </div>
       </div>
 
@@ -363,7 +361,7 @@
             <i class="bi bi-hourglass-split"></i>
           </div>
           <h6>Pending Check-Out</h6>
-          <h3>8</h3>
+          <h3>{{ pending_checkout }}</h3>
         </div>
       </div>
     </section>
@@ -393,72 +391,53 @@
             </tr>
           </thead>
 
-          <tbody>
-            <tr>
-              <td>Rahul Sharma</td>
-              <td>Priya Mehta</td>
-              <td>09:30 AM</td>
-              <td>-</td>
-              <td>
-                <span class="badge badge-inside">Checked In</span>
-              </td>
-              <td>
-                <button class="btn btn-checkout">Check-Out</button>
-              </td>
-            </tr>
+<tbody>
+{% for visitor in visitors %}
+<tr>
 
-            <tr>
-              <td>Ananya Rao</td>
-              <td>HR Department</td>
-              <td>10:15 AM</td>
-              <td>11:45 AM</td>
-              <td>
-                <span class="badge badge-out">Checked Out</span>
-              </td>
-              <td>
-                <button class="btn btn-checkin">Check-In</button>
-              </td>
-            </tr>
+  <td>{{ visitor.Name }}</td>
 
-            <tr>
-              <td>Vikram Singh</td>
-              <td>Admin Office</td>
-              <td>-</td>
-              <td>-</td>
-              <td>
-                <span class="badge badge-pending">Pending</span>
-              </td>
-              <td>
-                <button class="btn btn-checkin">Check-In</button>
-              </td>
-            </tr>
+  <td>-</td>
 
-            <tr>
-              <td>Neha Kapoor</td>
-              <td>Amit Verma</td>
-              <td>12:20 PM</td>
-              <td>-</td>
-              <td>
-                <span class="badge badge-inside">Checked In</span>
-              </td>
-              <td>
-                <button class="btn btn-checkout">Check-Out</button>
-              </td>
-            </tr>
+  <td>{{ visitor.VisitDate }}</td>
 
-            <tr>
-              <td>Arjun Nair</td>
-              <td>Operations Team</td>
-              <td>01:05 PM</td>
-              <td>02:15 PM</td>
-              <td>
-                <span class="badge badge-out">Checked Out</span>
-              </td>
-              <td>
-                <button class="btn btn-checkin">Check-In</button>
-              </td>
-            </tr>
-          </tbody>
+  <td>-</td>
+
+  <td>
+    {% if visitor.CheckInStatus == 'Checked In' %}
+      <span class="badge badge-inside">Checked In</span>
+
+    {% elif visitor.CheckInStatus == 'Checked Out' %}
+      <span class="badge badge-out">Checked Out</span>
+
+    {% else %}
+      <span class="badge badge-pending">Not Checked In</span>
+    {% endif %}
+  </td>
+
+  <td>
+    {% if visitor.CheckInStatus == 'Not Checked In' %}
+      <a href="/checkin/{{ visitor.VisitorID }}"
+         class="btn btn-checkin">
+         Check-In
+      </a>
+
+    {% elif visitor.CheckInStatus == 'Checked In' %}
+      <a href="/checkout/{{ visitor.VisitorID }}"
+         class="btn btn-checkout">
+         Check-Out
+      </a>
+
+    {% else %}
+      <button class="btn btn-secondary" disabled>
+        Completed
+      </button>
+    {% endif %}
+  </td>
+
+</tr>
+{% endfor %}
+</tbody>
         </table>
       </div>
     </section>

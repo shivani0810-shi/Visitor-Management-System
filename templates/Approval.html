@@ -307,7 +307,7 @@
             <i class="bi bi-hourglass-split"></i>
           </div>
           <h6>Pending Requests</h6>
-          <h3>18</h3>
+          <h2>{{ pending }}</h2>
         </div>
       </div>
 
@@ -317,7 +317,7 @@
             <i class="bi bi-check-circle"></i>
           </div>
           <h6>Approved Today</h6>
-          <h3>42</h3>
+          <h2>{{ approved }}</h2>
         </div>
       </div>
 
@@ -327,7 +327,7 @@
             <i class="bi bi-x-circle"></i>
           </div>
           <h6>Rejected Today</h6>
-          <h3>5</h3>
+          <h2>{{ rejected }}</h2>
         </div>
       </div>
     </section>
@@ -352,81 +352,56 @@
           </thead>
 
           <tbody>
-            <tr>
-              <td>Rahul Sharma</td>
-              <td>TechNova Solutions</td>
-              <td>Business Meeting</td>
-              <td>Priya Mehta</td>
-              <td>15 June 2026</td>
-              <td>
-                <span class="badge badge-pending">Pending</span>
-              </td>
-              <td>
-                <button class="btn btn-approve me-2">Approve</button>
-                <button class="btn btn-reject">Reject</button>
-              </td>
-            </tr>
 
-            <tr>
-              <td>Ananya Rao</td>
-              <td>BrightHire HR</td>
-              <td>Interview</td>
-              <td>HR Department</td>
-              <td>15 June 2026</td>
-              <td>
-                <span class="badge badge-pending">Pending</span>
-              </td>
-              <td>
-                <button class="btn btn-approve me-2">Approve</button>
-                <button class="btn btn-reject">Reject</button>
-              </td>
-            </tr>
+{% for visitor in visitors %}
+<tr>
 
-            <tr>
-              <td>Vikram Singh</td>
-              <td>Swift Couriers</td>
-              <td>Delivery</td>
-              <td>Admin Office</td>
-              <td>15 June 2026</td>
-              <td>
-                <span class="badge badge-approved">Approved</span>
-              </td>
-              <td>
-                <button class="btn btn-approve me-2">Approve</button>
-                <button class="btn btn-reject">Reject</button>
-              </td>
-            </tr>
+  <td>{{ visitor['Name'] }}</td>
 
-            <tr>
-              <td>Neha Kapoor</td>
-              <td>Prime Analytics</td>
-              <td>Client Visit</td>
-              <td>Amit Verma</td>
-              <td>15 June 2026</td>
-              <td>
-                <span class="badge badge-rejected">Rejected</span>
-              </td>
-              <td>
-                <button class="btn btn-approve me-2">Approve</button>
-                <button class="btn btn-reject">Reject</button>
-              </td>
-            </tr>
+  <td>{{ visitor['Company'] }}</td>
 
-            <tr>
-              <td>Arjun Nair</td>
-              <td>Metro Facilities</td>
-              <td>Maintenance</td>
-              <td>Operations Team</td>
-              <td>15 June 2026</td>
-              <td>
-                <span class="badge badge-pending">Pending</span>
-              </td>
-              <td>
-                <button class="btn btn-approve me-2">Approve</button>
-                <button class="btn btn-reject">Reject</button>
-              </td>
-            </tr>
-          </tbody>
+  <td>Visitor Meeting</td>
+
+  <td>Employee</td>
+
+  <td>{{ visitor['VisitDate'] }}</td>
+
+  <td>
+    {% if visitor['Status'] == 'Pending' %}
+      <span class="badge badge-pending">Pending</span>
+
+    {% elif visitor['Status'] == 'Approved' %}
+      <span class="badge badge-approved">Approved</span>
+
+    {% else %}
+      <span class="badge badge-rejected">Rejected</span>
+    {% endif %}
+  </td>
+
+  <td>
+
+    {% if visitor['Status'] == 'Pending' %}
+
+      <a href="/approve/{{ visitor['VisitorID'] }}"
+         class="btn btn-approve me-2">
+         Approve
+      </a>
+
+      <a href="/reject/{{ visitor['VisitorID'] }}"
+         class="btn btn-reject">
+         Reject
+      </a>
+
+    {% else %}
+      -
+    {% endif %}
+
+  </td>
+
+</tr>
+{% endfor %}
+
+</tbody>
         </table>
       </div>
     </section>
