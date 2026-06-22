@@ -314,37 +314,44 @@ def admin_dashboard():
 # ---------------------------
 @app.route('/login', methods=['POST'])
 def login():
+    try:
+        data = request.get_json()
 
-    data = request.get_json()
+        print("DATA RECEIVED:", data)
 
-    print("Login API called")
-    print(data)
+        if not data:
+            return jsonify({"message": "No JSON received"}), 400
 
-    email = data.get('email')
-    password = data.get('password')
+        email = data.get('email')
+        password = data.get('password')
 
-    cursor.execute(
-        "SELECT * FROM Users WHERE Email=%s AND Password=%s",
-        (email, password)
-    )
+        cursor.execute(
+            "SELECT * FROM users WHERE Email=%s AND Password=%s",
+            (email, password)
+        )
 
-    user = cursor.fetchone()
+        user = cursor.fetchone()
 
-    print(user)
+        print("USER:", user)
 
-    if user:
-        role = user["Role"]  # adjust if needed
+        if not user:
+            return jsonify({
+                "message": "Invalid Email or Password"
+            }), 401
 
-        # 🔥 IMPORTANT FIX (SESSION SET)
-        #session['role'] = role
-        #session['email'] = email
         session["user_id"] = user["UserID"]
-        session["role"] = role
+        session["role"] = user["Role"]
+
         return jsonify({
             "message": "Login Successful",
-            "role": role
-            }),200
+            "role": user["Role"]
+        }), 200
 
+    except Exception as e:
+        print("LOGIN ERROR:", str(e))
+        return jsonify({
+            "message": str(e)
+        }), 500
 
 # ---------------------------
 # LOGOUT
