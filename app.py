@@ -26,28 +26,28 @@ def approval():
 
     cursor.execute("""
         SELECT COUNT(*) AS pending
-        FROM Visitors
+        FROM visitors
         WHERE Status='Pending'
     """)
     pending = cursor.fetchone()['pending']
 
     cursor.execute("""
         SELECT COUNT(*) AS approved
-        FROM Visitors
+        FROM visitors
         WHERE Status='Approved'
     """)
     approved = cursor.fetchone()['approved']
 
     cursor.execute("""
         SELECT COUNT(*) AS rejected
-        FROM Visitors
+        FROM visitors
         WHERE Status='Rejected'
     """)
     rejected = cursor.fetchone()['rejected']
 
     cursor.execute("""
         SELECT *
-        FROM Visitors
+        FROM visitors
         ORDER BY VisitorID DESC
     """)
     visitors = cursor.fetchall()
@@ -70,7 +70,7 @@ def generate_pass():
     visit_date = request.form['visit_date']
 
     cursor.execute("""
-        SELECT * FROM Visitors
+        SELECT * FROM visitors
         WHERE Name=%s
         ORDER BY VisitorID DESC
         LIMIT 1
@@ -106,7 +106,7 @@ def generate_pass():
 def checkin(visitor_id):
 
     cursor.execute("""
-        UPDATE Visitors
+        UPDATE visitors
         SET CheckInStatus=%s
         WHERE VisitorID=%s
     """, ("Checked In", visitor_id))
@@ -118,7 +118,7 @@ def checkin(visitor_id):
 def checkout(visitor_id):
 
     cursor.execute("""
-        UPDATE Visitors
+        UPDATE visitors
         SET CheckInStatus=%s
         WHERE VisitorID=%s
     """, ("Checked Out", visitor_id))
@@ -129,7 +129,7 @@ def checkout(visitor_id):
 @app.route('/approve/<int:id>')
 def approve_visitor(id):
     cursor.execute(
-        "UPDATE Visitors SET Status='Approved' WHERE VisitorID=%s",
+        "UPDATE visitors SET Status='Approved' WHERE VisitorID=%s",
         (id,)
     )
     db.commit()
@@ -139,7 +139,7 @@ def checkinout():
 
     cursor.execute("""
         SELECT *
-        FROM Visitors
+        FROM visitors
         WHERE Status='Approved'
     """)
     visitors = cursor.fetchall()
@@ -147,7 +147,7 @@ def checkinout():
     # Checked In
     cursor.execute("""
         SELECT COUNT(*) AS total
-        FROM Visitors
+        FROM visitors
         WHERE CheckInStatus='Checked In'
     """)
     checked_in = cursor.fetchone()['total']
@@ -155,7 +155,7 @@ def checkinout():
     # Checked Out
     cursor.execute("""
         SELECT COUNT(*) AS total
-        FROM Visitors
+        FROM visitors
         WHERE CheckInStatus='Checked Out'
     """)
     checked_out = cursor.fetchone()['total']
@@ -163,7 +163,7 @@ def checkinout():
     # Currently Inside
     cursor.execute("""
         SELECT COUNT(*) AS total
-        FROM Visitors
+        FROM visitors
         WHERE CheckInStatus='Checked In'
     """)
     inside = cursor.fetchone()['total']
@@ -171,7 +171,7 @@ def checkinout():
     # Pending Check-Out
     cursor.execute("""
         SELECT COUNT(*) AS total
-        FROM Visitors
+        FROM visitors
         WHERE CheckInStatus='Checked In'
     """)
     pending_checkout = cursor.fetchone()['total']
@@ -187,7 +187,7 @@ def checkinout():
 @app.route('/reject/<int:id>')
 def reject_visitor(id):
     cursor.execute(
-        "UPDATE Visitors SET Status='Rejected' WHERE VisitorID=%s",
+        "UPDATE visitors SET Status='Rejected' WHERE VisitorID=%s",
         (id,)
     )
     db.commit()
@@ -201,21 +201,21 @@ def report():
 
     cursor.execute("""
         SELECT COUNT(*) AS daily
-        FROM Visitors
+        FROM visitors
         WHERE DATE(VisitDate)=CURDATE()
     """)
     daily = cursor.fetchone()["daily"]
 
     cursor.execute("""
         SELECT COUNT(*) AS weekly
-        FROM Visitors
+        FROM visitors
         WHERE YEARWEEK(VisitDate,1)=YEARWEEK(CURDATE(),1)
     """)
     weekly = cursor.fetchone()["weekly"]
 
     cursor.execute("""
         SELECT COUNT(*) AS monthly
-        FROM Visitors
+        FROM visitors
         WHERE MONTH(VisitDate)=MONTH(CURDATE())
         AND YEAR(VisitDate)=YEAR(CURDATE())
     """)
@@ -223,7 +223,7 @@ def report():
 
     cursor.execute("""
         SELECT COUNT(*) AS pending
-        FROM Visitors
+        FROM visitors
         WHERE Status='Pending'
     """)
     pending = cursor.fetchone()["pending"]
@@ -284,19 +284,19 @@ def qrpass():
 @app.route('/admin-dashboard')
 def admin_dashboard():
 
-    cursor.execute("SELECT COUNT(*) AS total FROM Visitors")
+    cursor.execute("SELECT COUNT(*) AS total FROM visitors")
     total_visitors = cursor.fetchone()["total"]
 
     cursor.execute("""
     SELECT COUNT(*) AS today
-    FROM Visitors
+    FROM visitors
     WHERE DATE(VisitDate)=CURDATE()
     """)
     today_visitors = cursor.fetchone()["today"]
     
     cursor.execute("""
     SELECT COUNT(*) AS pending
-    FROM Visitors
+    FROM visitors
     WHERE Status='Pending'
     """)
     pending_visitors = cursor.fetchone()["pending"]
@@ -370,19 +370,19 @@ def admin():
     if session.get('role') != "Admin":
         return "Unauthorized Access", 403
 
-    cursor.execute("SELECT COUNT(*) AS total FROM Visitors")
+    cursor.execute("SELECT COUNT(*) AS total FROM visitors")
     total_visitors = cursor.fetchone()["total"]
 
     cursor.execute("""
         SELECT COUNT(*) AS today
-        FROM Visitors
+        FROM visitors
         WHERE DATE(VisitDate) = CURDATE()
     """)
     today_visitors = cursor.fetchone()["today"]
 
     cursor.execute("""
         SELECT COUNT(*) AS pending
-        FROM Visitors
+        FROM visitors
         WHERE Status = 'Pending'
     """)
     pending_visitors = cursor.fetchone()["pending"]
@@ -399,18 +399,18 @@ def admin():
 # ---------------------------
 @app.route('/reception')
 def reception():
-    cursor.execute("SELECT COUNT(*) AS total FROM Visitors")
+    cursor.execute("SELECT COUNT(*) AS total FROM visitors")
     total_visitors = cursor.fetchone()["total"]
 
     cursor.execute("""
     SELECT COUNT(*) AS today
-    FROM Visitors
+    FROM visitors
     WHERE DATE(VisitDate) = CURDATE()
     """)
     today_visitors = cursor.fetchone()["today"]
     cursor.execute("""
     SELECT COUNT(*) AS pending
-    FROM Visitors
+    FROM visitors
     WHERE Status='Pending'
     """)
     pending_visitors = cursor.fetchone()["pending"]
@@ -421,7 +421,7 @@ def reception():
 
     return render_template(
         'reception.html',
-        total_visitors=today_visitors,   # because card says "Total Visitors Today"
+        total_visitors=today_visitors,   # because card says "Total visitors Today"
         checkedin_visitors=checkedin_visitors,
         checkedout_visitors=checkedout_visitors,
         pending_visitors=pending_visitors
@@ -458,7 +458,7 @@ def register_visitor():
     photo = request.files.get('photo')
     id_proof = request.files.get('id_proof')
     query = """
-    INSERT INTO Visitors (Name, Mobile, Email, Company)
+    INSERT INTO visitors (Name, Mobile, Email, Company)
     VALUES (%s, %s, %s, %s)
     """
     try:
@@ -493,17 +493,17 @@ def register():
 @app.route('/dashboard')
 def dashboard():
 
-    cursor.execute("SELECT COUNT(*) AS total FROM Visitors")
+    cursor.execute("SELECT COUNT(*) AS total FROM visitors")
     total_visitors = cursor.fetchone()["total"]
     cursor.execute("""
     SELECT COUNT(*) AS today
-    FROM Visitors
+    FROM visitors
     WHERE DATE(VisitDate)=CURDATE()
     """)
     today_visitors = cursor.fetchone()["today"]
     cursor.execute("""
     SELECT COUNT(*) AS pending
-    FROM Visitors
+    FROM visitors
     WHERE Status='Pending'
     """)
     pending_visitors = cursor.fetchone()["pending"]
